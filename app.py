@@ -7,7 +7,6 @@ import numpy as np
 from datetime import date, datetime
 import io
 
-# --- OLETUSASETUKSET (SESSION STATE) ---
 DEFAULT_SETTINGS = {
     'line_color': "#4a90e2",
     'bg_color': "#404040",
@@ -25,7 +24,7 @@ DEFAULT_SETTINGS = {
     'pos3_x': -30, 'pos3_y': 25,
     'pos4_x': 20, 'pos4_y': -30,
     'date_format': "DD.MM.YYYY", 
-    'stats_position': "Top Left"  # <-- UUSI: Tilastolaatikon oletussijainti
+    'stats_position': "Top Left"  
 }
 
 for k, v in DEFAULT_SETTINGS.items():
@@ -36,13 +35,11 @@ def reset_settings():
     for k, v in DEFAULT_SETTINGS.items():
         st.session_state[k] = v
 
-# --- SIVUN ASETUKSET ---
 st.set_page_config(page_title="Keeper Timeline Generator", layout="wide")
 
 st.title("Pokémon Sleep - Keeper Timeline Generator")
 st.write("Upload your Keeper Data CSV to generate your personal timeline!")
 
-# --- OHJEET KÄYTTÄJILLE & KAHVINAPPI ---
 with st.expander("Instructions & How to format your data"):
     st.markdown("""
     ### 1. Use the Template
@@ -83,7 +80,6 @@ with st.expander("Instructions & How to format your data"):
         </a>
         """, unsafe_allow_html=True)
 
-# --- KÄYTTÖLIITTYMÄ ---
 col1, col2 = st.columns(2)
 
 with col1:
@@ -92,13 +88,11 @@ with col1:
 with col2:
     total_caught = st.number_input("2. Total Pokémon caught:", min_value=1, value=1000)
 
-# --- GRAAFIN KUSTOMOINTI ---
 with st.expander("🎨 Graph Customization (Colors & Layout)"):
     st.write("Customize the look of your timeline.")
     
     st.button("🔄 Reset to Defaults", on_click=reset_settings)
     
-    # --- PÄIVITETTY: 6 saraketta yläriville, jotta tilastolaatikon sijainti mahtuu ---
     c_col1, c_col2, c_col3, c_col4, c_col5, c_col6 = st.columns(6)
     line_color = c_col1.color_picker("Timeline & Dots", key='line_color')
     bg_color = c_col2.color_picker("Inner BG", key='bg_color')
@@ -136,7 +130,6 @@ with st.expander("🎨 Graph Customization (Colors & Layout)"):
     pos4_x = p_col4.number_input("Pos 4 (X)", key='pos4_x')
     pos4_y = p_col4.number_input("Pos 4 (Y)", key='pos4_y')
 
-# --- JOS TIEDOSTO ON LADATTU, PIIRRETÄÄN GRAAFI ---
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
     
@@ -205,7 +198,6 @@ if uploaded_file is not None:
 
     props = dict(boxstyle='square,pad=1', facecolor='#555555', alpha=0.8, edgecolor='none')
     
-    # --- UUSI: Tilastolaatikon sijainnin logiikka ---
     if stats_position == "Bottom Right":
         ax.text(0.97, 0.05, stats_text, transform=ax.transAxes, fontsize=12,
                 ha='right', va='bottom', color=font_color, bbox=props, zorder=3)
@@ -241,11 +233,11 @@ if uploaded_file is not None:
             try:
                 befriend_count = int(float(row['Befriend #']))
                 if befriend_count >= 100:
-                    node_color = "#FFD700"  # Kulta
+                    node_color = "#FFD700"  
                 elif befriend_count >= 40:
-                    node_color = "#C0C0C0"  # Hopea
+                    node_color = "#C0C0C0"  
                 elif befriend_count >= 10:
-                    node_color = "#CD7F32"  # Pronssi
+                    node_color = "#CD7F32"  
             except ValueError:
                 pass 
         
