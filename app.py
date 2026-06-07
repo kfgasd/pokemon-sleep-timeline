@@ -24,7 +24,8 @@ DEFAULT_SETTINGS = {
     'pos2_x': 20, 'pos2_y': -65,
     'pos3_x': -30, 'pos3_y': 25,
     'pos4_x': 20, 'pos4_y': -30,
-    'date_format': "DD.MM.YYYY"  # <-- UUSI: Oletuspäivämäärämuoto
+    'date_format': "DD.MM.YYYY", 
+    'stats_position': "Top Left"  # <-- UUSI: Tilastolaatikon oletussijainti
 }
 
 for k, v in DEFAULT_SETTINGS.items():
@@ -93,24 +94,25 @@ with col2:
 
 # --- GRAAFIN KUSTOMOINTI ---
 with st.expander("🎨 Graph Customization (Colors & Layout)"):
-    st.write("Customize the look of your timeline. If things get messy, you can always reset!")
+    st.write("Customize the look of your timeline.")
     
     st.button("🔄 Reset to Defaults", on_click=reset_settings)
     
-    # --- UUSI: Päivämäärämuodon valinta lisätty ensimmäiselle riville ---
-    c_col1, c_col2, c_col3, c_col4, c_col5 = st.columns(5)
+    # --- PÄIVITETTY: 6 saraketta yläriville, jotta tilastolaatikon sijainti mahtuu ---
+    c_col1, c_col2, c_col3, c_col4, c_col5, c_col6 = st.columns(6)
     line_color = c_col1.color_picker("Timeline & Dots", key='line_color')
     bg_color = c_col2.color_picker("Inner BG", key='bg_color')
     fig_color = c_col3.color_picker("Outer BG", key='fig_color')
     font_color = c_col4.color_picker("Font Color", key='font_color')
     date_format = c_col5.selectbox("Date Format", ["DD.MM.YYYY", "MM/DD/YYYY", "YYYY-MM-DD"], key='date_format')
+    stats_position = c_col6.selectbox("Stats Box", ["Top Left", "Bottom Right"], key='stats_position')
     
     st.write("---")
     
     t_col1, t_col2, t_col3, t_col4 = st.columns(4)
     show_drought = t_col1.checkbox("Highlight longest drought", key='show_drought')
     show_releases = t_col2.checkbox("Show Pokémon Releases", key='show_releases')
-    show_medals = t_col3.checkbox("Show Befriend Medals", key='show_medals')
+    show_medals = t_col3.checkbox("Show Befriend Medals as Nodes", key='show_medals')
     sprite_zoom = t_col4.slider("Pokémon Sprite Size", min_value=0.05, max_value=1.0, step=0.05, key='sprite_zoom')
     
     st.write("---")
@@ -202,8 +204,14 @@ if uploaded_file is not None:
                   f"Longest drought: {int(longest_drought)} days")
 
     props = dict(boxstyle='square,pad=1', facecolor='#555555', alpha=0.8, edgecolor='none')
-    ax.text(0.03, 0.95, stats_text, transform=ax.transAxes, fontsize=12,
-            verticalalignment='top', color=font_color, bbox=props, zorder=3)
+    
+    # --- UUSI: Tilastolaatikon sijainnin logiikka ---
+    if stats_position == "Bottom Right":
+        ax.text(0.97, 0.05, stats_text, transform=ax.transAxes, fontsize=12,
+                ha='right', va='bottom', color=font_color, bbox=props, zorder=3)
+    else:
+        ax.text(0.03, 0.95, stats_text, transform=ax.transAxes, fontsize=12,
+                ha='left', va='top', color=font_color, bbox=props, zorder=3)
 
     def get_image(path, zoom_val):
         if os.path.exists(path):
@@ -349,13 +357,12 @@ if uploaded_file is not None:
     else:
         plt.subplots_adjust(bottom=0.15) 
 
-    # --- UUSI: Päivämäärämuotoilun logiikka ---
     if date_format == "MM/DD/YYYY":
         fmt_str = "%m/%d/%Y"
     elif date_format == "YYYY-MM-DD":
         fmt_str = "%Y-%m-%d"
     else:
-        fmt_str = "%d.%m.%Y" # Oletus (DD.MM.YYYY)
+        fmt_str = "%d.%m.%Y" 
 
     ax.annotate(f"Started: {aloituspaiva.strftime(fmt_str)}", xy=(0, 0), xycoords='axes fraction',  
                 xytext=(-115, -35), textcoords='offset points', color=font_color, alpha=0.7, fontsize=11, ha='left', va='top', annotation_clip=False)
@@ -363,12 +370,10 @@ if uploaded_file is not None:
     ax.annotate(f"Data as of: {tanaan.strftime(fmt_str)}", xy=(1, 1), xycoords='axes fraction',  
                 xytext=(40, 10), textcoords='offset points', color=font_color, alpha=0.7, fontsize=11, ha='right', va='bottom', annotation_clip=False)
 
-    # --- NÄYTETÄÄN GRAAFI STREAMLITISSÄ (Esikatselulaatu) ---
     st.pyplot(fig)
 
     st.write("---")
     
-    # --- LATAUSNAPPI HUIKEALLA RESOLUUTIOLLA ---
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=300, bbox_inches='tight', facecolor=fig.get_facecolor())
     buf.seek(0)
