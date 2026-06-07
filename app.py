@@ -251,7 +251,7 @@ if uploaded_file is not None:
             except ValueError:
                 pass
 
-        image_path = f"kuvat/{pokemon_name}.png"
+        image_path = f"pictures/{pokemon_name}.png"
         img = get_image(image_path, sprite_zoom)
         
         if img:
@@ -321,7 +321,7 @@ if uploaded_file is not None:
             for i, poke in enumerate(poket):
                 y_offset = pohja_y + (i * 35)
                 
-                image_path = f"kuvat/{poke}.png"
+                image_path = f"pictures/{poke}.png"
                 img = get_image(image_path, sprite_zoom)
                 
                 if img:
