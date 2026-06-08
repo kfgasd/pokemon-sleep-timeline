@@ -7,6 +7,7 @@ import numpy as np
 from datetime import date, datetime
 import io
 
+# --- OLETUSASETUKSET (SESSION STATE) ---
 DEFAULT_SETTINGS = {
     'line_color': "#4a90e2",
     'bg_color': "#404040",
@@ -57,7 +58,11 @@ with st.expander("Instructions & How to format your data"):
         * **Shinies:** Add an 'S' to the end of the name (e.g., `EspeonS`, `CharizardS`).
         * **Variants/Event Pokémon:** Write them together based on the event (e.g., `PikachuHoliday`, `PikachuHalloweenOrange`, `WooperPaldean`).
         * **Shiny Variants:** Combine both rules. (e.g., `PikachuHolidayS`).
-    * **Ingredient:** *(Optional)* Type 'A' for Mono or 'B' for ABB. Leave empty if not applicable.
+    * **Ingredient:** *(Optional)* Represents the ingredient spread:
+        * Type **A**, **AAA**, or **Mono** (Displays as **A**)
+        * Type **B** or **ABB** (Displays as **B**)
+        * Type **X**, **AAX**, or **Temporary** (Displays as **X**)
+        * Leave empty if not applicable.
     * **[Your Start Date]:** Format exactly as DD.MM.YYYY (e.g., 17.08.2024). Row 1 determines your starting date, and other dates are the pokémon's caught date.
     * **Befriend #:** *(Optional)* How many of this specific species you had befriended before catching this keeper. If you leave this empty, the graph will just show a normal dot without a number.
     """)
@@ -279,13 +284,27 @@ if uploaded_file is not None:
             )
             ax.add_artist(ab)
             
+            # --- UUSI: Badgen logiikka useille eri syötteille ---
             if pd.notna(ingredient):
                 ing_str = str(ingredient).strip().upper()
-                if ing_str in ['A', 'B']:
+                
+                display_char = None
+                bg_color_badge = None
+                
+                if ing_str in ['A', 'AAA', 'MONO']:
+                    display_char = 'A'
+                    bg_color_badge = '#FFD700' # Kulta
+                elif ing_str in ['B', 'ABB']:
+                    display_char = 'B'
+                    bg_color_badge = '#C0C0C0' # Hopea
+                elif ing_str in ['X', 'AAX', 'TEMPORARY']:
+                    display_char = 'X'
+                    bg_color_badge = '#CD7F32' # Pronssi
+                
+                if display_char:
                     text_x_offset = xybox_offset[0] + 15
                     text_y_offset = xybox_offset[1] + 15
-                    bg_color_badge = '#FFD700' if ing_str == 'A' else '#C0C0C0'
-                    ax.annotate(ing_str, xy=(x, y), xytext=(text_x_offset, text_y_offset),
+                    ax.annotate(display_char, xy=(x, y), xytext=(text_x_offset, text_y_offset),
                                 textcoords='offset points', color='black', fontsize=9,
                                 fontweight='bold', ha='center', va='center',
                                 bbox=dict(boxstyle='circle,pad=0.2', facecolor=bg_color_badge, edgecolor='#333333', linewidth=1, alpha=0.9),
