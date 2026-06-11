@@ -39,6 +39,9 @@ def reset_settings():
 st.set_page_config(page_title="Keeper Timeline Generator", layout="wide")
 
 st.title("Pokémon Sleep - Keeper Timeline Generator")
+
+st.markdown("*Created by [u/Awkward-State-2364](https://www.reddit.com/user/Awkward-State-2364/)*")
+
 st.write("Upload your Keeper Data CSV to generate your personal timeline!")
 
 with st.expander("Instructions & How to format your data"):
